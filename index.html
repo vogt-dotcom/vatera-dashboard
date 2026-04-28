@@ -382,7 +382,7 @@
           <span class="pill" style="background: rgba(129,140,248,.15); color: var(--apts);">apts</span>
         </div>
         <div class="toggle-row">
-          <input type="checkbox" id="op-sunbeds" checked />
+          <input type="checkbox" id="op-sunbeds" />
           <label for="op-sunbeds">Operate sunbeds on the beach</label>
           <span class="pill" style="background: rgba(251,191,36,.15); color: var(--sunbeds);">sunbeds</span>
         </div>
@@ -392,17 +392,17 @@
           <span class="pill" style="background: rgba(251,146,60,.15); color: var(--bar);">bar</span>
         </div>
         <div class="toggle-row">
-          <input type="checkbox" id="op-taverna" checked />
+          <input type="checkbox" id="op-taverna" />
           <label for="op-taverna">Operate taverna (full kitchen)</label>
           <span class="pill" style="background: rgba(74,222,128,.15); color: var(--taverna);">taverna</span>
         </div>
         <hr style="border: none; border-top: 1px solid var(--border); margin: 12px 0;" />
         <div class="toggle-row">
-          <input type="checkbox" id="self-managed" />
+          <input type="checkbox" id="self-managed" checked />
           <label for="self-managed">Self-managed rooms (Airbnb + lockbox, no on-site staff)</label>
         </div>
         <div class="toggle-row">
-          <input type="checkbox" id="owner-operated" checked />
+          <input type="checkbox" id="owner-operated" />
           <label for="owner-operated">Owner-operated (no salary cost for owner)</label>
         </div>
       </div>
@@ -445,18 +445,18 @@
         <div class="row three-col"><label>Number of rooms</label><input type="range" id="rooms-count" min="1" max="10" step="1" value="10" /><input type="number" id="rooms-count-n" value="10" /></div>
 
         <div style="font-size:11px;color:var(--muted);margin: 10px 0 4px;text-transform:uppercase;letter-spacing:0.05em;">Rate per night (€)</div>
-        <div class="row three-col"><label>Peak (Jul–Aug)</label><input type="range" id="rooms-rate-peak" min="20" max="120" step="5" value="60" /><input type="number" id="rooms-rate-peak-n" value="60" /></div>
-        <div class="row three-col"><label>Shoulder (Jun, Sep)</label><input type="range" id="rooms-rate-shoulder" min="20" max="120" step="5" value="45" /><input type="number" id="rooms-rate-shoulder-n" value="45" /></div>
+        <div class="row three-col"><label>Peak (Jul–Aug)</label><input type="range" id="rooms-rate-peak" min="20" max="120" step="5" value="70" /><input type="number" id="rooms-rate-peak-n" value="70" /></div>
+        <div class="row three-col"><label>Shoulder (Jun, Sep)</label><input type="range" id="rooms-rate-shoulder" min="20" max="120" step="5" value="50" /><input type="number" id="rooms-rate-shoulder-n" value="50" /></div>
         <div class="row three-col"><label>Low (May, Oct)</label><input type="range" id="rooms-rate-low" min="20" max="120" step="5" value="35" /><input type="number" id="rooms-rate-low-n" value="35" /></div>
 
         <div style="font-size:11px;color:var(--muted);margin: 10px 0 4px;text-transform:uppercase;letter-spacing:0.05em;">Occupancy (%)</div>
-        <div class="row three-col"><label>Peak (Jul–Aug)</label><input type="range" id="rooms-occ-peak" min="0" max="100" step="5" value="65" /><input type="number" id="rooms-occ-peak-n" value="65" /></div>
+        <div class="row three-col"><label>Peak (Jul–Aug)</label><input type="range" id="rooms-occ-peak" min="0" max="100" step="5" value="95" /><input type="number" id="rooms-occ-peak-n" value="95" /></div>
         <div class="row three-col"><label>Shoulder (Jun, Sep)</label><input type="range" id="rooms-occ-shoulder" min="0" max="100" step="5" value="40" /><input type="number" id="rooms-occ-shoulder-n" value="40" /></div>
-        <div class="row three-col"><label>Low (May, Oct)</label><input type="range" id="rooms-occ-low" min="0" max="100" step="5" value="20" /><input type="number" id="rooms-occ-low-n" value="20" /></div>
+        <div class="row three-col"><label>Low (May, Oct)</label><input type="range" id="rooms-occ-low" min="0" max="100" step="5" value="0" /><input type="number" id="rooms-occ-low-n" value="0" /></div>
 
         <div style="font-size:11px;color:var(--muted);margin: 10px 0 4px;text-transform:uppercase;letter-spacing:0.05em;">Costs</div>
-        <div class="row three-col"><label>Cleaning per turnover (€)<span class="desc">Higher for self-managed</span></label><input type="range" id="rooms-cleaning" min="0" max="60" step="2" value="15" /><input type="number" id="rooms-cleaning-n" value="15" /></div>
-        <div class="row three-col"><label>Variable per night (€)<span class="desc">Linen, utilities, toiletries</span></label><input type="range" id="rooms-varcost" min="0" max="20" step="0.5" value="5" /><input type="number" id="rooms-varcost-n" value="5" /></div>
+        <div class="row three-col"><label>Cleaning per turnover (€)<span class="desc">Higher for self-managed</span></label><input type="range" id="rooms-cleaning" min="0" max="60" step="2" value="6" /><input type="number" id="rooms-cleaning-n" value="6" /></div>
+        <div class="row three-col"><label>Variable per night (€)<span class="desc">Linen, utilities, toiletries</span></label><input type="range" id="rooms-varcost" min="0" max="20" step="0.5" value="4" /><input type="number" id="rooms-varcost-n" value="4" /></div>
         <div class="row three-col"><label>OTA commission (%)<span class="desc">Booking.com / Airbnb fees</span></label><input type="range" id="rooms-ota" min="0" max="25" step="1" value="15" /><input type="number" id="rooms-ota-n" value="15" /></div>
       </div>
     </div>
@@ -471,16 +471,16 @@
         <div class="row three-col"><label>Number of apartments</label><input type="range" id="apt-count" min="0" max="2" step="1" value="2" /><input type="number" id="apt-count-n" value="2" /></div>
 
         <div style="font-size:11px;color:var(--muted);margin: 10px 0 4px;text-transform:uppercase;letter-spacing:0.05em;">Rate per night (€)</div>
-        <div class="row three-col"><label>Peak</label><input type="range" id="apt-rate-peak" min="30" max="200" step="5" value="75" /><input type="number" id="apt-rate-peak-n" value="75" /></div>
+        <div class="row three-col"><label>Peak</label><input type="range" id="apt-rate-peak" min="30" max="200" step="5" value="90" /><input type="number" id="apt-rate-peak-n" value="90" /></div>
         <div class="row three-col"><label>Shoulder</label><input type="range" id="apt-rate-shoulder" min="30" max="200" step="5" value="55" /><input type="number" id="apt-rate-shoulder-n" value="55" /></div>
-        <div class="row three-col"><label>Low</label><input type="range" id="apt-rate-low" min="30" max="200" step="5" value="45" /><input type="number" id="apt-rate-low-n" value="45" /></div>
+        <div class="row three-col"><label>Low</label><input type="range" id="apt-rate-low" min="30" max="200" step="5" value="30" /><input type="number" id="apt-rate-low-n" value="30" /></div>
 
         <div style="font-size:11px;color:var(--muted);margin: 10px 0 4px;text-transform:uppercase;letter-spacing:0.05em;">Occupancy (%)</div>
-        <div class="row three-col"><label>Peak</label><input type="range" id="apt-occ-peak" min="0" max="100" step="5" value="70" /><input type="number" id="apt-occ-peak-n" value="70" /></div>
+        <div class="row three-col"><label>Peak</label><input type="range" id="apt-occ-peak" min="0" max="100" step="5" value="95" /><input type="number" id="apt-occ-peak-n" value="95" /></div>
         <div class="row three-col"><label>Shoulder</label><input type="range" id="apt-occ-shoulder" min="0" max="100" step="5" value="45" /><input type="number" id="apt-occ-shoulder-n" value="45" /></div>
-        <div class="row three-col"><label>Low</label><input type="range" id="apt-occ-low" min="0" max="100" step="5" value="25" /><input type="number" id="apt-occ-low-n" value="25" /></div>
+        <div class="row three-col"><label>Low</label><input type="range" id="apt-occ-low" min="0" max="100" step="5" value="10" /><input type="number" id="apt-occ-low-n" value="10" /></div>
 
-        <div class="row three-col"><label>Cleaning per turnover (€)</label><input type="range" id="apt-cleaning" min="0" max="80" step="2" value="25" /><input type="number" id="apt-cleaning-n" value="25" /></div>
+        <div class="row three-col"><label>Cleaning per turnover (€)</label><input type="range" id="apt-cleaning" min="0" max="80" step="2" value="14" /><input type="number" id="apt-cleaning-n" value="14" /></div>
         <div class="row three-col"><label>Variable per night (€)</label><input type="range" id="apt-varcost" min="0" max="30" step="0.5" value="6" /><input type="number" id="apt-varcost-n" value="6" /></div>
         <div class="row three-col"><label>OTA commission (%)</label><input type="range" id="apt-ota" min="0" max="25" step="1" value="15" /><input type="number" id="apt-ota-n" value="15" /></div>
       </div>
@@ -513,9 +513,9 @@
       </div>
       <div class="panel-body">
         <div style="font-size:11px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em;">Avg covers/day (drinks + snacks)</div>
-        <div class="row three-col"><label>Peak</label><input type="range" id="bar-covers-peak" min="0" max="200" step="5" value="60" /><input type="number" id="bar-covers-peak-n" value="60" /></div>
-        <div class="row three-col"><label>Shoulder</label><input type="range" id="bar-covers-shoulder" min="0" max="200" step="5" value="35" /><input type="number" id="bar-covers-shoulder-n" value="35" /></div>
-        <div class="row three-col"><label>Low</label><input type="range" id="bar-covers-low" min="0" max="200" step="5" value="15" /><input type="number" id="bar-covers-low-n" value="15" /></div>
+        <div class="row three-col"><label>Peak</label><input type="range" id="bar-covers-peak" min="0" max="200" step="5" value="70" /><input type="number" id="bar-covers-peak-n" value="70" /></div>
+        <div class="row three-col"><label>Shoulder</label><input type="range" id="bar-covers-shoulder" min="0" max="200" step="5" value="30" /><input type="number" id="bar-covers-shoulder-n" value="30" /></div>
+        <div class="row three-col"><label>Low</label><input type="range" id="bar-covers-low" min="0" max="200" step="5" value="0" /><input type="number" id="bar-covers-low-n" value="0" /></div>
 
         <div class="row three-col"><label>Avg spend / cover (€)</label><input type="range" id="bar-spend" min="2" max="25" step="0.5" value="8" /><input type="number" id="bar-spend-n" value="8" /></div>
         <div class="row three-col"><label>COGS (% of revenue)<span class="desc">Drinks margin is high — typically 25–30%</span></label><input type="range" id="bar-cogs" min="15" max="50" step="1" value="28" /><input type="number" id="bar-cogs-n" value="28" /></div>
@@ -531,8 +531,8 @@
       <div class="panel-body">
         <div style="font-size:11px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em;">Avg covers/day</div>
         <div class="row three-col"><label>Peak</label><input type="range" id="tav-covers-peak" min="0" max="200" step="5" value="50" /><input type="number" id="tav-covers-peak-n" value="50" /></div>
-        <div class="row three-col"><label>Shoulder</label><input type="range" id="tav-covers-shoulder" min="0" max="200" step="5" value="25" /><input type="number" id="tav-covers-shoulder-n" value="25" /></div>
-        <div class="row three-col"><label>Low</label><input type="range" id="tav-covers-low" min="0" max="200" step="5" value="12" /><input type="number" id="tav-covers-low-n" value="12" /></div>
+        <div class="row three-col"><label>Shoulder</label><input type="range" id="tav-covers-shoulder" min="0" max="200" step="5" value="20" /><input type="number" id="tav-covers-shoulder-n" value="20" /></div>
+        <div class="row three-col"><label>Low</label><input type="range" id="tav-covers-low" min="0" max="200" step="5" value="0" /><input type="number" id="tav-covers-low-n" value="0" /></div>
 
         <div class="row three-col"><label>Avg spend / cover (€)</label><input type="range" id="tav-spend" min="5" max="60" step="0.5" value="18" /><input type="number" id="tav-spend-n" value="18" /></div>
         <div class="row three-col"><label>Food COGS (%)<span class="desc">Greek taverna typical: 32–38%</span></label><input type="range" id="tav-cogs" min="20" max="60" step="1" value="35" /><input type="number" id="tav-cogs-n" value="35" /></div>
@@ -550,13 +550,13 @@
         <div class="row three-col"><label>Rent</label><input type="range" id="cost-rent" min="0" max="36000" step="500" value="12000" /><input type="number" id="cost-rent-n" value="12000" /></div>
         <div class="row three-col"><label>Insurance</label><input type="range" id="cost-insurance" min="0" max="6000" step="100" value="1500" /><input type="number" id="cost-insurance-n" value="1500" /></div>
         <div class="row three-col"><label>Licensing & compliance</label><input type="range" id="cost-licensing" min="0" max="4000" step="100" value="1000" /><input type="number" id="cost-licensing-n" value="1000" /></div>
-        <div class="row three-col"><label>Marketing / website</label><input type="range" id="cost-marketing" min="0" max="6000" step="100" value="1500" /><input type="number" id="cost-marketing-n" value="1500" /></div>
+        <div class="row three-col"><label>Marketing / website</label><input type="range" id="cost-marketing" min="0" max="6000" step="100" value="0" /><input type="number" id="cost-marketing-n" value="0" /></div>
 
         <div style="font-size:11px;color:var(--muted);margin: 10px 0 4px;text-transform:uppercase;letter-spacing:0.05em;">Staff cost / month (paid only during payroll window — see section 2)</div>
         <div class="row three-col"><label>Beach bar staff</label><input type="range" id="staff-bar" min="0" max="6000" step="100" value="1800" /><input type="number" id="staff-bar-n" value="1800" /></div>
         <div class="row three-col"><label>Taverna staff (cook+server)</label><input type="range" id="staff-taverna" min="0" max="10000" step="100" value="3500" /><input type="number" id="staff-taverna-n" value="3500" /></div>
         <div class="row three-col"><label>Sunbed attendant</label><input type="range" id="staff-sunbed" min="0" max="3000" step="100" value="800" /><input type="number" id="staff-sunbed-n" value="800" /></div>
-        <div class="row three-col"><label>Reception (only if not self-managed)</label><input type="range" id="staff-reception" min="0" max="4000" step="100" value="1200" /><input type="number" id="staff-reception-n" value="1200" /></div>
+        <div class="row three-col"><label>Reception (only if not self-managed)</label><input type="range" id="staff-reception" min="0" max="4000" step="100" value="600" /><input type="number" id="staff-reception-n" value="600" /></div>
 
         <div style="font-size:11px;color:var(--muted);margin: 10px 0 4px;text-transform:uppercase;letter-spacing:0.05em;">Utilities (€/month) — scales with what's open</div>
         <div class="row three-col"><label>Electric (peak)</label><input type="range" id="util-elec-peak" min="0" max="2000" step="50" value="600" /><input type="number" id="util-elec-peak-n" value="600" /></div>
@@ -659,9 +659,9 @@ const CLASS_CYCLE = ['off', 'low', 'shoulder', 'peak'];
 const PAYROLL_CYCLE = [0, 0.5, 1];
 
 // Default seasonal pattern (from business plan + concept doc)
-const DEFAULT_ACCOM = ['off','off','off','off','low','shoulder','peak','peak','shoulder','low','off','off'];
-const DEFAULT_BEACH = ['off','off','off','off','low','shoulder','peak','peak','shoulder','low','off','off'];
-const DEFAULT_TAVERNA = ['off','off','off','off','low','shoulder','peak','peak','shoulder','low','off','off'];
+const DEFAULT_ACCOM = ['low','low','low','low','low','shoulder','peak','peak','shoulder','low','low','low'];
+const DEFAULT_BEACH = ['off','off','off','off','off','shoulder','peak','peak','shoulder','off','off','off'];
+const DEFAULT_TAVERNA = ['off','off','off','off','off','shoulder','peak','peak','shoulder','off','off','off'];
 // Payroll: mid-May (½) → Jun, Jul, Aug, Sep (full) ≈ 4.5 months
 const DEFAULT_PAYROLL = [0, 0, 0, 0, 0.5, 1, 1, 1, 1, 0, 0, 0];
 
