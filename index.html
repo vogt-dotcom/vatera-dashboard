@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Vatera Beachfront — Business Plan Dashboard</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
   :root {
     --bg: #0f172a;
@@ -283,6 +284,39 @@
   details summary { cursor: pointer; color: var(--muted); font-size: 12px; padding: 4px 0; }
   details[open] summary { color: var(--accent); }
 
+  .export-btn {
+    background: #4ade80 !important;
+    color: #0f172a !important;
+    border-color: #4ade80 !important;
+    font-weight: 600;
+  }
+  .export-btn:hover { background: #22c55e !important; border-color: #22c55e !important; }
+  .export-btn:disabled { opacity: 0.6; cursor: wait; }
+  .export-spacer { margin-left: auto; }
+
+  /* Print / PDF styles — Cmd+P → Save as PDF */
+  @media print {
+    body { background: white; color: black; font-size: 11px; }
+    header, .preset-bar, .controls { display: none !important; }
+    .layout { grid-template-columns: 1fr !important; padding: 12px !important; max-width: none; }
+    .panel { background: white !important; border-color: #ddd !important; break-inside: avoid; page-break-inside: avoid; }
+    .panel-header { background: #f8f9fa !important; }
+    .panel-header h2, .panel-body, .kpi-value, table td, table th { color: black !important; }
+    .panel-body, .panel-body.collapsed { display: block !important; }
+    .panel-header .toggle-arrow { display: none; }
+    .kpi { background: white !important; border-color: #ddd !important; }
+    .kpi-label, .kpi-sub { color: #666 !important; }
+    .kpi.good .kpi-value { color: #16a34a !important; }
+    .kpi.bad .kpi-value { color: #dc2626 !important; }
+    .kpi.warn .kpi-value { color: #d97706 !important; }
+    table th { color: #666 !important; }
+    table th, table td { border-color: #ddd !important; }
+    table tr.subtotal td { background: #f8f9fa !important; color: black !important; }
+    table tr.total td { background: #f0f9ff !important; color: black !important; border-top-color: #0284c7 !important; }
+    .chart-container { background: #0f172a; padding: 12px; border-radius: 6px; }
+    @page { margin: 1.5cm; size: A4; }
+  }
+
   .scenario-mode {
     display: flex;
     gap: 6px;
@@ -319,6 +353,9 @@
   <button class="preset-btn" data-preset="rooms-bar-sunbeds">Rooms + Bar + Sunbeds (no taverna)</button>
   <button class="preset-btn" data-preset="taverna-winter">Taverna only — winter weekends</button>
   <button class="preset-btn" data-preset="full-year-taverna">Full op + year-round taverna</button>
+  <span class="export-spacer"></span>
+  <button class="preset-btn export-btn" id="export-png" title="Download a PNG snapshot — great for messaging apps">📥 Save as PNG</button>
+  <button class="preset-btn export-btn" id="export-pdf" title="Open print dialog — pick 'Save as PDF' as destination">🖨 Save as PDF</button>
 </div>
 
 <div class="layout">
@@ -1250,9 +1287,51 @@ function applyPreset(name) {
   compute();
 }
 
-document.querySelectorAll('.preset-btn').forEach(btn => {
+document.querySelectorAll('.preset-btn[data-preset]').forEach(btn => {
   btn.addEventListener('click', () => applyPreset(btn.dataset.preset));
 });
+
+// =================== EXPORT ===================
+
+// Save the outputs column as a PNG image (good for messaging apps).
+async function exportPNG() {
+  const btn = document.getElementById('export-png');
+  const orig = btn.textContent;
+  btn.textContent = '⏳ Capturing…';
+  btn.disabled = true;
+  try {
+    // Make sure all collapsed panels are open during capture
+    const collapsed = document.querySelectorAll('.outputs .panel-header.collapsed');
+    collapsed.forEach(h => { h.classList.remove('collapsed'); h.nextElementSibling.classList.remove('collapsed'); });
+
+    const target = document.querySelector('.outputs');
+    const canvas = await html2canvas(target, {
+      backgroundColor: '#0f172a',
+      scale: 2,
+      logging: false,
+      useCORS: true,
+    });
+    const link = document.createElement('a');
+    const date = new Date().toISOString().slice(0, 10);
+    link.download = `vatera-scenario-${date}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  } catch (err) {
+    alert('Snapshot failed: ' + err.message);
+    console.error(err);
+  } finally {
+    btn.textContent = orig;
+    btn.disabled = false;
+  }
+}
+
+// Trigger the browser's print dialog. The user picks "Save as PDF" as destination.
+function exportPDF() {
+  window.print();
+}
+
+document.getElementById('export-png').addEventListener('click', exportPNG);
+document.getElementById('export-pdf').addEventListener('click', exportPDF);
 
 // Initial compute
 compute();
