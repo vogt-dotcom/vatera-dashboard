@@ -1,0 +1,1261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Vatera Beachfront — Business Plan Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0f172a;
+    --panel: #1e293b;
+    --panel-2: #273449;
+    --border: #334155;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --accent: #38bdf8;
+    --accent-2: #fbbf24;
+    --good: #4ade80;
+    --bad: #f87171;
+    --rooms: #38bdf8;
+    --apts: #818cf8;
+    --sunbeds: #fbbf24;
+    --bar: #fb923c;
+    --taverna: #4ade80;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  header {
+    padding: 18px 24px 10px;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(to bottom, #1e293b, #0f172a);
+  }
+  header h1 { margin: 0; font-size: 22px; letter-spacing: -0.02em; }
+  header p { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
+  .preset-bar {
+    padding: 12px 24px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+  .preset-bar span.label {
+    color: var(--muted);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-right: 4px;
+  }
+  .preset-btn {
+    background: var(--panel-2);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+  .preset-btn:hover { background: var(--accent); color: #0f172a; border-color: var(--accent); }
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr 1.1fr;
+    gap: 16px;
+    padding: 16px 24px 32px;
+    max-width: 1700px;
+    margin: 0 auto;
+  }
+  @media (max-width: 1100px) { .layout { grid-template-columns: 1fr; } }
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 14px;
+  }
+  .panel-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+  }
+  .panel-header h2 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  .panel-header .toggle-arrow { color: var(--muted); font-size: 12px; transition: transform 0.2s; }
+  .panel-header.collapsed .toggle-arrow { transform: rotate(-90deg); }
+  .panel-body { padding: 14px 16px; }
+  .panel-body.collapsed { display: none; }
+  .panel-color-stripe {
+    width: 4px;
+    height: 16px;
+    border-radius: 2px;
+    margin-right: 10px;
+    display: inline-block;
+    vertical-align: middle;
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: 1fr 80px;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .row.three-col {
+    grid-template-columns: 130px 1fr 90px;
+  }
+  .row label {
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .row label .desc { display: block; color: #64748b; font-size: 11px; }
+  input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--border);
+    outline: none;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+    border: 2px solid #0f172a;
+  }
+  input[type="number"], input[type="text"] {
+    background: var(--panel-2);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 4px 6px;
+    width: 100%;
+    font-family: inherit;
+    font-size: 12px;
+  }
+  input[type="number"] { text-align: right; }
+  input[type="checkbox"] { accent-color: var(--accent); cursor: pointer; }
+
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 0;
+    font-size: 13px;
+  }
+  .toggle-row label { cursor: pointer; flex: 1; }
+  .toggle-row .pill {
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 10px;
+    background: var(--panel-2);
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+
+  .month-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 4px;
+    margin-top: 6px;
+  }
+  .month-grid .month-cell {
+    text-align: center;
+    padding: 6px 2px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-size: 10px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .month-grid .month-cell.active {
+    background: var(--accent);
+    color: #0f172a;
+    border-color: var(--accent);
+    font-weight: 600;
+  }
+  .month-grid .month-cell.peak.active { background: var(--bad); border-color: var(--bad); color: white; }
+  .month-grid .month-cell.shoulder.active { background: var(--accent-2); border-color: var(--accent-2); color: #0f172a; }
+  .month-grid .month-cell.low.active { background: #64748b; border-color: #64748b; color: white; }
+  .month-grid .month-cell.payroll-half {
+    background: linear-gradient(to right, #4ade80 50%, var(--panel-2) 50%);
+    border-color: #4ade80;
+    color: var(--text);
+    font-weight: 600;
+  }
+  .month-grid .month-cell.payroll-full {
+    background: #4ade80;
+    border-color: #4ade80;
+    color: #0f172a;
+    font-weight: 700;
+  }
+  .month-cell .frac { font-size: 9px; opacity: 0.85; display: block; margin-top: 1px; }
+
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .kpi {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+  }
+  .kpi .kpi-label {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 4px;
+  }
+  .kpi .kpi-value {
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+  .kpi .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .kpi.good .kpi-value { color: var(--good); }
+  .kpi.bad .kpi-value { color: var(--bad); }
+  .kpi.warn .kpi-value { color: var(--accent-2); }
+
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  table th, table td {
+    padding: 6px 8px;
+    text-align: right;
+    border-bottom: 1px solid var(--border);
+  }
+  table th:first-child, table td:first-child { text-align: left; }
+  table th { color: var(--muted); font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; }
+  table tr.subtotal td { font-weight: 600; background: var(--panel-2); }
+  table tr.total td { font-weight: 700; background: #1e293b; border-top: 2px solid var(--accent); }
+  .pos { color: var(--good); }
+  .neg { color: var(--bad); }
+
+  .chart-container { position: relative; height: 280px; padding: 8px; }
+  .chart-container.tall { height: 360px; }
+
+  .legend-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+
+  .info-line {
+    font-size: 11px;
+    color: var(--muted);
+    background: var(--panel-2);
+    padding: 8px 10px;
+    border-radius: 6px;
+    border-left: 3px solid var(--accent);
+    margin-bottom: 12px;
+  }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  details { margin-top: 8px; }
+  details summary { cursor: pointer; color: var(--muted); font-size: 12px; padding: 4px 0; }
+  details[open] summary { color: var(--accent); }
+
+  .scenario-mode {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+  .scenario-mode button {
+    flex: 1;
+    background: var(--panel-2);
+    color: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 5px;
+    font-size: 11px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .scenario-mode button.active { background: var(--accent); color: #0f172a; border-color: var(--accent); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Vatera Beachfront — Business Plan Sandbox</h1>
+  <p>10 rooms + 2 apartments + beach bar/taverna · Vatera, Lesvos · play with assumptions, see profit live</p>
+</header>
+
+<div class="preset-bar">
+  <span class="label">Presets:</span>
+  <button class="preset-btn" data-preset="full-normal">Full op — Normal</button>
+  <button class="preset-btn" data-preset="full-pessimistic">Full op — Pessimistic</button>
+  <button class="preset-btn" data-preset="full-optimistic">Full op — Optimistic</button>
+  <button class="preset-btn" data-preset="rooms-only-airbnb">Rooms only (Airbnb, no staff)</button>
+  <button class="preset-btn" data-preset="rooms-bar-no-taverna">Rooms + Beach Bar (no taverna)</button>
+  <button class="preset-btn" data-preset="rooms-bar-sunbeds">Rooms + Bar + Sunbeds (no taverna)</button>
+  <button class="preset-btn" data-preset="taverna-winter">Taverna only — winter weekends</button>
+  <button class="preset-btn" data-preset="full-year-taverna">Full op + year-round taverna</button>
+</div>
+
+<div class="layout">
+
+  <!-- ============= LEFT: CONTROLS ============= -->
+  <div class="controls">
+
+    <!-- Operating Modes -->
+    <div class="panel">
+      <div class="panel-header">
+        <h2>1. What's open?</h2>
+        <span class="toggle-arrow">▼</span>
+      </div>
+      <div class="panel-body">
+        <div class="info-line">Toggle each revenue stream on/off. Self-managed mode = no on-site staff, lockbox/Airbnb only.</div>
+        <div class="toggle-row">
+          <input type="checkbox" id="op-rooms" checked />
+          <label for="op-rooms">Operate 10 rooms</label>
+          <span class="pill" style="background: rgba(56,189,248,.15); color: var(--rooms);">rooms</span>
+        </div>
+        <div class="toggle-row">
+          <input type="checkbox" id="op-apartments" checked />
+          <label for="op-apartments">Operate 2 apartments (Airbnb)</label>
+          <span class="pill" style="background: rgba(129,140,248,.15); color: var(--apts);">apts</span>
+        </div>
+        <div class="toggle-row">
+          <input type="checkbox" id="op-sunbeds" checked />
+          <label for="op-sunbeds">Operate sunbeds on the beach</label>
+          <span class="pill" style="background: rgba(251,191,36,.15); color: var(--sunbeds);">sunbeds</span>
+        </div>
+        <div class="toggle-row">
+          <input type="checkbox" id="op-bar" checked />
+          <label for="op-bar">Operate beach bar (drinks/snacks)</label>
+          <span class="pill" style="background: rgba(251,146,60,.15); color: var(--bar);">bar</span>
+        </div>
+        <div class="toggle-row">
+          <input type="checkbox" id="op-taverna" checked />
+          <label for="op-taverna">Operate taverna (full kitchen)</label>
+          <span class="pill" style="background: rgba(74,222,128,.15); color: var(--taverna);">taverna</span>
+        </div>
+        <hr style="border: none; border-top: 1px solid var(--border); margin: 12px 0;" />
+        <div class="toggle-row">
+          <input type="checkbox" id="self-managed" />
+          <label for="self-managed">Self-managed rooms (Airbnb + lockbox, no on-site staff)</label>
+        </div>
+        <div class="toggle-row">
+          <input type="checkbox" id="owner-operated" checked />
+          <label for="owner-operated">Owner-operated (no salary cost for owner)</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Operating Months -->
+    <div class="panel">
+      <div class="panel-header">
+        <h2>2. Operating months</h2>
+        <span class="toggle-arrow">▼</span>
+      </div>
+      <div class="panel-body">
+        <div class="info-line">Click a month to cycle: <strong>OFF → LOW → SHOULDER → PEAK</strong>. Different streams can have different schedules below.</div>
+
+        <div style="font-size:12px;color:var(--muted);margin-bottom:4px;">Accommodation (rooms + apartments)</div>
+        <div class="month-grid" id="months-accom"></div>
+
+        <div style="font-size:12px;color:var(--muted);margin: 12px 0 4px;">Beach (sunbeds + bar)</div>
+        <div class="month-grid" id="months-beach"></div>
+
+        <div style="font-size:12px;color:var(--muted);margin: 12px 0 4px;">Taverna</div>
+        <div class="month-grid" id="months-taverna"></div>
+
+        <div style="font-size:12px;color:var(--muted);margin: 18px 0 4px;display:flex;justify-content:space-between;align-items:center;">
+          <span>Staff payroll window <span style="font-size:10px;">(click cycles <span style="color:var(--muted);">0</span> → <span style="color:#4ade80;">½</span> → <span style="color:#4ade80;font-weight:700;">1</span>)</span></span>
+          <span><strong id="payroll-total" style="color:var(--text);">4.5</strong> months staffed</span>
+        </div>
+        <div class="month-grid" id="months-payroll"></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:6px;font-style:italic;">All staff salaries (bar, taverna, sunbed attendant, reception, owner) are billed only during this window. Default = mid-May → late Sep.</div>
+      </div>
+    </div>
+
+    <!-- Rooms -->
+    <div class="panel">
+      <div class="panel-header">
+        <h2><span class="panel-color-stripe" style="background: var(--rooms);"></span>3. Rooms (10 rooms)</h2>
+        <span class="toggle-arrow">▼</span>
+      </div>
+      <div class="panel-body">
+        <div class="row three-col"><label>Number of rooms</label><input type="range" id="rooms-count" min="1" max="10" step="1" value="10" /><input type="number" id="rooms-count-n" value="10" /></div>
+
+        <div style="font-size:11px;color:var(--muted);margin: 10px 0 4px;text-transform:uppercase;letter-spacing:0.05em;">Rate per night (€)</div>
+        <div class="row three-col"><label>Peak (Jul–Aug)</label><input type="range" id="rooms-rate-peak" min="20" max="120" step="5" value="60" /><input type="number" id="rooms-rate-peak-n" value="60" /></div>
+        <div class="row three-col"><label>Shoulder (Jun, Sep)</label><input type="range" id="rooms-rate-shoulder" min="20" max="120" step="5" value="45" /><input type="number" id="rooms-rate-shoulder-n" value="45" /></div>
+        <div class="row three-col"><label>Low (May, Oct)</label><input type="range" id="rooms-rate-low" min="20" max="120" step="5" value="35" /><input type="number" id="rooms-rate-low-n" value="35" /></div>
+
+        <div style="font-size:11px;color:var(--muted);margin: 10px 0 4px;text-transform:uppercase;letter-spacing:0.05em;">Occupancy (%)</div>
+        <div class="row three-col"><label>Peak (Jul–Aug)</label><input type="range" id="rooms-occ-peak" min="0" max="100" step="5" value="65" /><input type="number" id="rooms-occ-peak-n" value="65" /></div>
+        <div class="row three-col"><label>Shoulder (Jun, Sep)</label><input type="range" id="rooms-occ-shoulder" min="0" max="100" step="5" value="40" /><input type="number" id="rooms-occ-shoulder-n" value="40" /></div>
+        <div class="row three-col"><label>Low (May, Oct)</label><input type="range" id="rooms-occ-low" min="0" max="100" step="5" value="20" /><input type="number" id="rooms-occ-low-n" value="20" /></div>
+
+        <div style="font-size:11px;color:var(--muted);margin: 10px 0 4px;text-transform:uppercase;letter-spacing:0.05em;">Costs</div>
+        <div class="row three-col"><label>Cleaning per turnover (€)<span class="desc">Higher for self-managed</span></label><input type="range" id="rooms-cleaning" min="0" max="60" step="2" value="15" /><input type="number" id="rooms-cleaning-n" value="15" /></div>
+        <div class="row three-col"><label>Variable per night (€)<span class="desc">Linen, utilities, toiletries</span></label><input type="range" id="rooms-varcost" min="0" max="20" step="0.5" value="5" /><input type="number" id="rooms-varcost-n" value="5" /></div>
+        <div class="row three-col"><label>OTA commission (%)<span class="desc">Booking.com / Airbnb fees</span></label><input type="range" id="rooms-ota" min="0" max="25" step="1" value="15" /><input type="number" id="rooms-ota-n" value="15" /></div>
+      </div>
+    </div>
+
+    <!-- Apartments -->
+    <div class="panel">
+      <div class="panel-header">
+        <h2><span class="panel-color-stripe" style="background: var(--apts);"></span>4. Apartments (2 units)</h2>
+        <span class="toggle-arrow">▼</span>
+      </div>
+      <div class="panel-body">
+        <div class="row three-col"><label>Number of apartments</label><input type="range" id="apt-count" min="0" max="2" step="1" value="2" /><input type="number" id="apt-count-n" value="2" /></div>
+
+        <div style="font-size:11px;color:var(--muted);margin: 10px 0 4px;text-transform:uppercase;letter-spacing:0.05em;">Rate per night (€)</div>
+        <div class="row three-col"><label>Peak</label><input type="range" id="apt-rate-peak" min="30" max="200" step="5" value="75" /><input type="number" id="apt-rate-peak-n" value="75" /></div>
+        <div class="row three-col"><label>Shoulder</label><input type="range" id="apt-rate-shoulder" min="30" max="200" step="5" value="55" /><input type="number" id="apt-rate-shoulder-n" value="55" /></div>
+        <div class="row three-col"><label>Low</label><input type="range" id="apt-rate-low" min="30" max="200" step="5" value="45" /><input type="number" id="apt-rate-low-n" value="45" /></div>
+
+        <div style="font-size:11px;color:var(--muted);margin: 10px 0 4px;text-transform:uppercase;letter-spacing:0.05em;">Occupancy (%)</div>
+        <div class="row three-col"><label>Peak</label><input type="range" id="apt-occ-peak" min="0" max="100" step="5" value="70" /><input type="number" id="apt-occ-peak-n" value="70" /></div>
+        <div class="row three-col"><label>Shoulder</label><input type="range" id="apt-occ-shoulder" min="0" max="100" step="5" value="45" /><input type="number" id="apt-occ-shoulder-n" value="45" /></div>
+        <div class="row three-col"><label>Low</label><input type="range" id="apt-occ-low" min="0" max="100" step="5" value="25" /><input type="number" id="apt-occ-low-n" value="25" /></div>
+
+        <div class="row three-col"><label>Cleaning per turnover (€)</label><input type="range" id="apt-cleaning" min="0" max="80" step="2" value="25" /><input type="number" id="apt-cleaning-n" value="25" /></div>
+        <div class="row three-col"><label>Variable per night (€)</label><input type="range" id="apt-varcost" min="0" max="30" step="0.5" value="6" /><input type="number" id="apt-varcost-n" value="6" /></div>
+        <div class="row three-col"><label>OTA commission (%)</label><input type="range" id="apt-ota" min="0" max="25" step="1" value="15" /><input type="number" id="apt-ota-n" value="15" /></div>
+      </div>
+    </div>
+
+    <!-- Sunbeds -->
+    <div class="panel">
+      <div class="panel-header">
+        <h2><span class="panel-color-stripe" style="background: var(--sunbeds);"></span>5. Sunbeds</h2>
+        <span class="toggle-arrow">▼</span>
+      </div>
+      <div class="panel-body">
+        <div class="row three-col"><label>Number of sets<span class="desc">2 sunbeds + umbrella</span></label><input type="range" id="sb-sets" min="0" max="80" step="5" value="35" /><input type="number" id="sb-sets-n" value="35" /></div>
+        <div class="row three-col"><label>Price per set/day (€)<span class="desc">Or min. spend equivalent</span></label><input type="range" id="sb-price" min="0" max="25" step="1" value="10" /><input type="number" id="sb-price-n" value="10" /></div>
+
+        <div style="font-size:11px;color:var(--muted);margin: 10px 0 4px;text-transform:uppercase;letter-spacing:0.05em;">Utilization (% of sets rented)</div>
+        <div class="row three-col"><label>Peak</label><input type="range" id="sb-util-peak" min="0" max="100" step="5" value="55" /><input type="number" id="sb-util-peak-n" value="55" /></div>
+        <div class="row three-col"><label>Shoulder</label><input type="range" id="sb-util-shoulder" min="0" max="100" step="5" value="30" /><input type="number" id="sb-util-shoulder-n" value="30" /></div>
+        <div class="row three-col"><label>Low</label><input type="range" id="sb-util-low" min="0" max="100" step="5" value="15" /><input type="number" id="sb-util-low-n" value="15" /></div>
+
+        <div class="row three-col"><label>Beach concession fee/year (€)<span class="desc">Public beach use permit</span></label><input type="range" id="sb-concession" min="0" max="6000" step="100" value="1500" /><input type="number" id="sb-concession-n" value="1500" /></div>
+      </div>
+    </div>
+
+    <!-- Beach Bar -->
+    <div class="panel">
+      <div class="panel-header">
+        <h2><span class="panel-color-stripe" style="background: var(--bar);"></span>6. Beach Bar (drinks/snacks)</h2>
+        <span class="toggle-arrow">▼</span>
+      </div>
+      <div class="panel-body">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em;">Avg covers/day (drinks + snacks)</div>
+        <div class="row three-col"><label>Peak</label><input type="range" id="bar-covers-peak" min="0" max="200" step="5" value="60" /><input type="number" id="bar-covers-peak-n" value="60" /></div>
+        <div class="row three-col"><label>Shoulder</label><input type="range" id="bar-covers-shoulder" min="0" max="200" step="5" value="35" /><input type="number" id="bar-covers-shoulder-n" value="35" /></div>
+        <div class="row three-col"><label>Low</label><input type="range" id="bar-covers-low" min="0" max="200" step="5" value="15" /><input type="number" id="bar-covers-low-n" value="15" /></div>
+
+        <div class="row three-col"><label>Avg spend / cover (€)</label><input type="range" id="bar-spend" min="2" max="25" step="0.5" value="8" /><input type="number" id="bar-spend-n" value="8" /></div>
+        <div class="row three-col"><label>COGS (% of revenue)<span class="desc">Drinks margin is high — typically 25–30%</span></label><input type="range" id="bar-cogs" min="15" max="50" step="1" value="28" /><input type="number" id="bar-cogs-n" value="28" /></div>
+      </div>
+    </div>
+
+    <!-- Taverna -->
+    <div class="panel">
+      <div class="panel-header">
+        <h2><span class="panel-color-stripe" style="background: var(--taverna);"></span>7. Taverna (lunch + dinner)</h2>
+        <span class="toggle-arrow">▼</span>
+      </div>
+      <div class="panel-body">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em;">Avg covers/day</div>
+        <div class="row three-col"><label>Peak</label><input type="range" id="tav-covers-peak" min="0" max="200" step="5" value="50" /><input type="number" id="tav-covers-peak-n" value="50" /></div>
+        <div class="row three-col"><label>Shoulder</label><input type="range" id="tav-covers-shoulder" min="0" max="200" step="5" value="25" /><input type="number" id="tav-covers-shoulder-n" value="25" /></div>
+        <div class="row three-col"><label>Low</label><input type="range" id="tav-covers-low" min="0" max="200" step="5" value="12" /><input type="number" id="tav-covers-low-n" value="12" /></div>
+
+        <div class="row three-col"><label>Avg spend / cover (€)</label><input type="range" id="tav-spend" min="5" max="60" step="0.5" value="18" /><input type="number" id="tav-spend-n" value="18" /></div>
+        <div class="row three-col"><label>Food COGS (%)<span class="desc">Greek taverna typical: 32–38%</span></label><input type="range" id="tav-cogs" min="20" max="60" step="1" value="35" /><input type="number" id="tav-cogs-n" value="35" /></div>
+      </div>
+    </div>
+
+    <!-- Costs -->
+    <div class="panel">
+      <div class="panel-header">
+        <h2>8. Fixed & operating costs</h2>
+        <span class="toggle-arrow">▼</span>
+      </div>
+      <div class="panel-body">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em;">Annual fixed costs (€)</div>
+        <div class="row three-col"><label>Rent</label><input type="range" id="cost-rent" min="0" max="36000" step="500" value="12000" /><input type="number" id="cost-rent-n" value="12000" /></div>
+        <div class="row three-col"><label>Insurance</label><input type="range" id="cost-insurance" min="0" max="6000" step="100" value="1500" /><input type="number" id="cost-insurance-n" value="1500" /></div>
+        <div class="row three-col"><label>Licensing & compliance</label><input type="range" id="cost-licensing" min="0" max="4000" step="100" value="1000" /><input type="number" id="cost-licensing-n" value="1000" /></div>
+        <div class="row three-col"><label>Marketing / website</label><input type="range" id="cost-marketing" min="0" max="6000" step="100" value="1500" /><input type="number" id="cost-marketing-n" value="1500" /></div>
+
+        <div style="font-size:11px;color:var(--muted);margin: 10px 0 4px;text-transform:uppercase;letter-spacing:0.05em;">Staff cost / month (paid only during payroll window — see section 2)</div>
+        <div class="row three-col"><label>Beach bar staff</label><input type="range" id="staff-bar" min="0" max="6000" step="100" value="1800" /><input type="number" id="staff-bar-n" value="1800" /></div>
+        <div class="row three-col"><label>Taverna staff (cook+server)</label><input type="range" id="staff-taverna" min="0" max="10000" step="100" value="3500" /><input type="number" id="staff-taverna-n" value="3500" /></div>
+        <div class="row three-col"><label>Sunbed attendant</label><input type="range" id="staff-sunbed" min="0" max="3000" step="100" value="800" /><input type="number" id="staff-sunbed-n" value="800" /></div>
+        <div class="row three-col"><label>Reception (only if not self-managed)</label><input type="range" id="staff-reception" min="0" max="4000" step="100" value="1200" /><input type="number" id="staff-reception-n" value="1200" /></div>
+
+        <div style="font-size:11px;color:var(--muted);margin: 10px 0 4px;text-transform:uppercase;letter-spacing:0.05em;">Utilities (€/month) — scales with what's open</div>
+        <div class="row three-col"><label>Electric (peak)</label><input type="range" id="util-elec-peak" min="0" max="2000" step="50" value="600" /><input type="number" id="util-elec-peak-n" value="600" /></div>
+        <div class="row three-col"><label>Electric (shoulder)</label><input type="range" id="util-elec-shoulder" min="0" max="2000" step="50" value="350" /><input type="number" id="util-elec-shoulder-n" value="350" /></div>
+        <div class="row three-col"><label>Electric (low/closed)</label><input type="range" id="util-elec-low" min="0" max="2000" step="50" value="150" /><input type="number" id="util-elec-low-n" value="150" /></div>
+        <div class="row three-col"><label>Water + gas + waste / mo</label><input type="range" id="util-other" min="0" max="600" step="20" value="160" /><input type="number" id="util-other-n" value="160" /></div>
+
+        <div style="font-size:11px;color:var(--muted);margin: 10px 0 4px;text-transform:uppercase;letter-spacing:0.05em;">Other</div>
+        <div class="row three-col"><label>Maintenance / yr</label><input type="range" id="cost-maint" min="0" max="10000" step="100" value="2000" /><input type="number" id="cost-maint-n" value="2000" /></div>
+        <div class="row three-col"><label>Misc & contingency / yr</label><input type="range" id="cost-misc" min="0" max="10000" step="100" value="2000" /><input type="number" id="cost-misc-n" value="2000" /></div>
+        <div class="row three-col"><label>Initial investment (CapEx)<span class="desc">For payback calc</span></label><input type="range" id="capex" min="0" max="60000" step="500" value="20000" /><input type="number" id="capex-n" value="20000" /></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ============= RIGHT: OUTPUTS ============= -->
+  <div class="outputs">
+
+    <!-- Headline KPIs -->
+    <div class="kpi-grid">
+      <div class="kpi"><div class="kpi-label">Total revenue</div><div class="kpi-value" id="kpi-revenue">€0</div><div class="kpi-sub" id="kpi-revenue-sub"></div></div>
+      <div class="kpi"><div class="kpi-label">Total costs</div><div class="kpi-value" id="kpi-costs">€0</div><div class="kpi-sub" id="kpi-costs-sub"></div></div>
+      <div class="kpi" id="kpi-ebitda-card"><div class="kpi-label">EBITDA (pre-tax profit)</div><div class="kpi-value" id="kpi-ebitda">€0</div><div class="kpi-sub" id="kpi-ebitda-sub"></div></div>
+      <div class="kpi"><div class="kpi-label">Net margin</div><div class="kpi-value" id="kpi-margin">0%</div><div class="kpi-sub" id="kpi-margin-sub"></div></div>
+    </div>
+
+    <div class="kpi-grid" style="grid-template-columns: repeat(3, 1fr);">
+      <div class="kpi"><div class="kpi-label">CapEx payback</div><div class="kpi-value" id="kpi-payback" style="font-size:18px;">—</div><div class="kpi-sub" id="kpi-payback-sub">at current scenario</div></div>
+      <div class="kpi"><div class="kpi-label">Operating days</div><div class="kpi-value" id="kpi-days" style="font-size:18px;">0</div><div class="kpi-sub" id="kpi-days-sub">across active streams</div></div>
+      <div class="kpi"><div class="kpi-label">Avg monthly EBITDA</div><div class="kpi-value" id="kpi-monthly" style="font-size:18px;">€0</div><div class="kpi-sub">across operating months</div></div>
+    </div>
+
+    <!-- Revenue mix -->
+    <div class="panel">
+      <div class="panel-header"><h2>Revenue mix</h2><span class="toggle-arrow">▼</span></div>
+      <div class="panel-body">
+        <div class="grid-2">
+          <div class="chart-container"><canvas id="chart-revmix"></canvas></div>
+          <div>
+            <table id="table-revmix">
+              <thead><tr><th>Stream</th><th>Revenue</th><th>%</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Monthly chart -->
+    <div class="panel">
+      <div class="panel-header"><h2>Monthly P&L (revenue stacked, EBITDA line)</h2><span class="toggle-arrow">▼</span></div>
+      <div class="panel-body">
+        <div class="chart-container tall"><canvas id="chart-monthly"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Detailed P&L -->
+    <div class="panel">
+      <div class="panel-header"><h2>Detailed P&L</h2><span class="toggle-arrow">▼</span></div>
+      <div class="panel-body">
+        <table id="table-pl">
+          <thead><tr><th>Line</th><th>Annual €</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Sensitivity hint -->
+    <div class="panel">
+      <div class="panel-header"><h2>Reality checks & assumptions</h2><span class="toggle-arrow">▼</span></div>
+      <div class="panel-body" style="font-size:12px;color:var(--muted);line-height:1.6;">
+        <p><strong style="color:var(--text);">Benchmarks from the Vatera study:</strong></p>
+        <ul style="padding-left:18px;margin: 4px 0 8px;">
+          <li>North Aegean hotel bed-occupancy ~39.6% annual avg (2024 ELSTAT) — this is your reality check on rooms.</li>
+          <li>Booking.com Vatera spot rates: ~€56/night early June; £56–£80+ shoulder. Premium positioning is unlikely.</li>
+          <li>~96% of international airport arrivals to Lesvos happen May–Sep — winter operation needs local/Greek demand.</li>
+          <li>Greece KYE restaurant licence fee (paravolo): €75–€375; beach concession deadline 28 Feb (special 15 Mar 2026).</li>
+          <li>Go/no-go trigger: in-season ~€1,000–€1,300/day combined beach + taverna sales = the plan works under Normal.</li>
+        </ul>
+        <p><strong style="color:var(--text);">How calculations work:</strong></p>
+        <ul style="padding-left:18px;margin: 4px 0;">
+          <li>Each month is classed Peak / Shoulder / Low / Off via the calendar grid above. Click a month to cycle.</li>
+          <li>Revenue per stream = days_active × volume × rate, summed across months for that stream's class.</li>
+          <li>Self-managed adds a per-turnover cleaning cost but removes the reception salary line.</li>
+          <li>Owner-operated mode means owner draws no salary — toggle off to add a market wage.</li>
+          <li>Numbers are pre-tax / pre-finance. VAT not modelled (assume net).</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// =================== CONFIG ===================
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const DAYS_IN_MONTH = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+const CLASS_CYCLE = ['off', 'low', 'shoulder', 'peak'];
+const PAYROLL_CYCLE = [0, 0.5, 1];
+
+// Default seasonal pattern (from business plan + concept doc)
+const DEFAULT_ACCOM = ['off','off','off','off','low','shoulder','peak','peak','shoulder','low','off','off'];
+const DEFAULT_BEACH = ['off','off','off','off','low','shoulder','peak','peak','shoulder','low','off','off'];
+const DEFAULT_TAVERNA = ['off','off','off','off','low','shoulder','peak','peak','shoulder','low','off','off'];
+// Payroll: mid-May (½) → Jun, Jul, Aug, Sep (full) ≈ 4.5 months
+const DEFAULT_PAYROLL = [0, 0, 0, 0, 0.5, 1, 1, 1, 1, 0, 0, 0];
+
+const STATE = {
+  monthsAccom: [...DEFAULT_ACCOM],
+  monthsBeach: [...DEFAULT_BEACH],
+  monthsTaverna: [...DEFAULT_TAVERNA],
+  payroll: [...DEFAULT_PAYROLL],
+};
+
+// =================== DOM SETUP ===================
+
+// Collapsible panels
+document.querySelectorAll('.panel-header').forEach(h => {
+  h.addEventListener('click', () => {
+    h.classList.toggle('collapsed');
+    h.nextElementSibling.classList.toggle('collapsed');
+  });
+});
+
+// Build month grids
+function buildMonthGrid(elId, stateKey) {
+  const el = document.getElementById(elId);
+  el.innerHTML = '';
+  STATE[stateKey].forEach((cls, i) => {
+    const cell = document.createElement('div');
+    cell.className = 'month-cell ' + cls + (cls !== 'off' ? ' active' : '');
+    cell.textContent = MONTHS[i];
+    cell.title = `${MONTHS[i]} — ${cls.toUpperCase()}`;
+    cell.addEventListener('click', () => {
+      const cur = STATE[stateKey][i];
+      const next = CLASS_CYCLE[(CLASS_CYCLE.indexOf(cur) + 1) % CLASS_CYCLE.length];
+      STATE[stateKey][i] = next;
+      buildMonthGrid(elId, stateKey);
+      compute();
+    });
+    el.appendChild(cell);
+  });
+}
+buildMonthGrid('months-accom', 'monthsAccom');
+buildMonthGrid('months-beach', 'monthsBeach');
+buildMonthGrid('months-taverna', 'monthsTaverna');
+
+// Payroll grid (different cycle: 0 → 0.5 → 1)
+function buildPayrollGrid() {
+  const el = document.getElementById('months-payroll');
+  el.innerHTML = '';
+  STATE.payroll.forEach((val, i) => {
+    const cell = document.createElement('div');
+    let cls = 'month-cell';
+    if (val === 0.5) cls += ' payroll-half';
+    else if (val === 1) cls += ' payroll-full';
+    cell.className = cls;
+    const label = val === 0.5 ? '½' : val === 1 ? '●' : '—';
+    cell.innerHTML = `${MONTHS[i]}<span class="frac">${label}</span>`;
+    cell.title = `${MONTHS[i]} — ${val} month of staff pay`;
+    cell.addEventListener('click', () => {
+      const cur = STATE.payroll[i];
+      const next = PAYROLL_CYCLE[(PAYROLL_CYCLE.indexOf(cur) + 1) % PAYROLL_CYCLE.length];
+      STATE.payroll[i] = next;
+      buildPayrollGrid();
+      compute();
+    });
+    el.appendChild(cell);
+  });
+  const total = STATE.payroll.reduce((a, b) => a + b, 0);
+  const totalEl = document.getElementById('payroll-total');
+  if (totalEl) totalEl.textContent = total.toFixed(1);
+}
+buildPayrollGrid();
+
+// Bind sliders <-> number inputs (any control with id ending in -n is the number twin)
+function bindAllSliders() {
+  document.querySelectorAll('input[type="range"]').forEach(slider => {
+    const numId = slider.id + '-n';
+    const num = document.getElementById(numId);
+    if (num) {
+      slider.addEventListener('input', () => { num.value = slider.value; compute(); });
+      num.addEventListener('input', () => { slider.value = num.value; compute(); });
+    } else {
+      slider.addEventListener('input', compute);
+    }
+  });
+  document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.addEventListener('change', compute));
+}
+bindAllSliders();
+
+// =================== HELPERS ===================
+const v = id => parseFloat(document.getElementById(id).value) || 0;
+const cb = id => document.getElementById(id).checked;
+const fmt = n => '€' + Math.round(n).toLocaleString('en-US');
+const fmtSigned = n => (n >= 0 ? '€' : '-€') + Math.round(Math.abs(n)).toLocaleString('en-US');
+
+// Days operating per class for a given schedule (off => 0)
+function daysByClass(schedule) {
+  const out = { peak: 0, shoulder: 0, low: 0, total: 0 };
+  schedule.forEach((cls, i) => {
+    if (cls === 'off') return;
+    out[cls] += DAYS_IN_MONTH[i];
+    out.total += DAYS_IN_MONTH[i];
+  });
+  return out;
+}
+
+// Build per-month series for a stream (for stacked chart)
+function monthlyRevenueSeries(schedule, perDayByClass) {
+  return schedule.map((cls, i) => {
+    if (cls === 'off') return 0;
+    return perDayByClass[cls] * DAYS_IN_MONTH[i];
+  });
+}
+
+// =================== COMPUTE ===================
+function compute() {
+  // ---------- Inputs ----------
+  const opRooms = cb('op-rooms');
+  const opApt = cb('op-apartments');
+  const opSb = cb('op-sunbeds');
+  const opBar = cb('op-bar');
+  const opTav = cb('op-taverna');
+  const selfManaged = cb('self-managed');
+  const ownerOperated = cb('owner-operated');
+
+  const dAccom = daysByClass(STATE.monthsAccom);
+  const dBeach = daysByClass(STATE.monthsBeach);
+  const dTav = daysByClass(STATE.monthsTaverna);
+
+  // ---------- ROOMS ----------
+  const roomsCount = opRooms ? v('rooms-count') : 0;
+  const roomsRate = { peak: v('rooms-rate-peak'), shoulder: v('rooms-rate-shoulder'), low: v('rooms-rate-low') };
+  const roomsOcc = { peak: v('rooms-occ-peak')/100, shoulder: v('rooms-occ-shoulder')/100, low: v('rooms-occ-low')/100 };
+  const roomsCleaning = v('rooms-cleaning');
+  const roomsVarCost = v('rooms-varcost');
+  const roomsOTA = v('rooms-ota')/100;
+
+  // Per-day revenue per class
+  const roomsPerDayRev = {
+    peak: roomsCount * roomsRate.peak * roomsOcc.peak,
+    shoulder: roomsCount * roomsRate.shoulder * roomsOcc.shoulder,
+    low: roomsCount * roomsRate.low * roomsOcc.low,
+  };
+  const roomsRevenue = roomsPerDayRev.peak * dAccom.peak + roomsPerDayRev.shoulder * dAccom.shoulder + roomsPerDayRev.low * dAccom.low;
+  const roomNights = roomsCount * (roomsOcc.peak * dAccom.peak + roomsOcc.shoulder * dAccom.shoulder + roomsOcc.low * dAccom.low);
+  const roomsCleaningCost = roomNights * roomsCleaning;
+  const roomsVarCostTotal = roomNights * roomsVarCost;
+  const roomsOTACost = roomsRevenue * roomsOTA;
+
+  // ---------- APARTMENTS ----------
+  const aptCount = opApt ? v('apt-count') : 0;
+  const aptRate = { peak: v('apt-rate-peak'), shoulder: v('apt-rate-shoulder'), low: v('apt-rate-low') };
+  const aptOcc = { peak: v('apt-occ-peak')/100, shoulder: v('apt-occ-shoulder')/100, low: v('apt-occ-low')/100 };
+  const aptCleaning = v('apt-cleaning');
+  const aptVarCost = v('apt-varcost');
+  const aptOTA = v('apt-ota')/100;
+  const aptPerDayRev = {
+    peak: aptCount * aptRate.peak * aptOcc.peak,
+    shoulder: aptCount * aptRate.shoulder * aptOcc.shoulder,
+    low: aptCount * aptRate.low * aptOcc.low,
+  };
+  const aptRevenue = aptPerDayRev.peak * dAccom.peak + aptPerDayRev.shoulder * dAccom.shoulder + aptPerDayRev.low * dAccom.low;
+  const aptNights = aptCount * (aptOcc.peak * dAccom.peak + aptOcc.shoulder * dAccom.shoulder + aptOcc.low * dAccom.low);
+  const aptCleaningCost = aptNights * aptCleaning;
+  const aptVarCostTotal = aptNights * aptVarCost;
+  const aptOTACost = aptRevenue * aptOTA;
+
+  // ---------- SUNBEDS ----------
+  const sbSets = opSb ? v('sb-sets') : 0;
+  const sbPrice = v('sb-price');
+  const sbUtil = { peak: v('sb-util-peak')/100, shoulder: v('sb-util-shoulder')/100, low: v('sb-util-low')/100 };
+  const sbConcession = opSb ? v('sb-concession') : 0;
+  const sbPerDayRev = {
+    peak: sbSets * sbPrice * sbUtil.peak,
+    shoulder: sbSets * sbPrice * sbUtil.shoulder,
+    low: sbSets * sbPrice * sbUtil.low,
+  };
+  const sbRevenue = sbPerDayRev.peak * dBeach.peak + sbPerDayRev.shoulder * dBeach.shoulder + sbPerDayRev.low * dBeach.low;
+
+  // ---------- BEACH BAR ----------
+  const barOn = opBar ? 1 : 0;
+  const barCovers = { peak: v('bar-covers-peak'), shoulder: v('bar-covers-shoulder'), low: v('bar-covers-low') };
+  const barSpend = v('bar-spend');
+  const barCogs = v('bar-cogs')/100;
+  const barPerDayRev = {
+    peak: barOn * barCovers.peak * barSpend,
+    shoulder: barOn * barCovers.shoulder * barSpend,
+    low: barOn * barCovers.low * barSpend,
+  };
+  const barRevenue = barPerDayRev.peak * dBeach.peak + barPerDayRev.shoulder * dBeach.shoulder + barPerDayRev.low * dBeach.low;
+  const barCogsCost = barRevenue * barCogs;
+
+  // ---------- TAVERNA ----------
+  const tavOn = opTav ? 1 : 0;
+  const tavCovers = { peak: v('tav-covers-peak'), shoulder: v('tav-covers-shoulder'), low: v('tav-covers-low') };
+  const tavSpend = v('tav-spend');
+  const tavCogs = v('tav-cogs')/100;
+  const tavPerDayRev = {
+    peak: tavOn * tavCovers.peak * tavSpend,
+    shoulder: tavOn * tavCovers.shoulder * tavSpend,
+    low: tavOn * tavCovers.low * tavSpend,
+  };
+  const tavRevenue = tavPerDayRev.peak * dTav.peak + tavPerDayRev.shoulder * dTav.shoulder + tavPerDayRev.low * dTav.low;
+  const tavCogsCost = tavRevenue * tavCogs;
+
+  // ---------- FIXED COSTS ----------
+  const rent = v('cost-rent');
+  const insurance = v('cost-insurance');
+  const licensing = v('cost-licensing');
+  const marketing = v('cost-marketing');
+  const maintenance = v('cost-maint');
+  const misc = v('cost-misc');
+
+  // ---------- STAFF ----------
+  // All staff are billed strictly against the payroll window (default mid-May → late Sep ≈ 4.5 months).
+  const payrollMonthsTotal = STATE.payroll.reduce((a, b) => a + b, 0);
+
+  const staffBar = (opBar ? v('staff-bar') : 0) * payrollMonthsTotal;
+  const staffTav = (opTav ? v('staff-taverna') : 0) * payrollMonthsTotal;
+  const staffSb = (opSb ? v('staff-sunbed') : 0) * payrollMonthsTotal;
+  // Reception applies if running rooms/apartments AND not self-managed
+  const staffRecept = (!selfManaged && (opRooms || opApt) ? v('staff-reception') : 0) * payrollMonthsTotal;
+  const staffTotal = staffBar + staffTav + staffSb + staffRecept;
+  // Owner salary: if not owner-operated, add notional €2000/mo across the payroll window
+  const ownerCost = ownerOperated ? 0 : 2000 * payrollMonthsTotal;
+
+  // ---------- UTILITIES ----------
+  // Per-month, take the max class across all active schedules to size electric
+  let utilElecTotal = 0;
+  for (let i = 0; i < 12; i++) {
+    const classes = [];
+    if (opRooms || opApt) classes.push(STATE.monthsAccom[i]);
+    if (opSb || opBar) classes.push(STATE.monthsBeach[i]);
+    if (opTav) classes.push(STATE.monthsTaverna[i]);
+    const active = classes.filter(c => c !== 'off');
+    if (active.length === 0) continue;
+    const has = c => active.includes(c);
+    const elec = has('peak') ? v('util-elec-peak') : has('shoulder') ? v('util-elec-shoulder') : v('util-elec-low');
+    utilElecTotal += elec;
+  }
+  // Other utilities only in months with anything active
+  let monthsAnyActive = 0;
+  for (let i = 0; i < 12; i++) {
+    const any = (opRooms || opApt) && STATE.monthsAccom[i] !== 'off' ||
+                (opSb || opBar) && STATE.monthsBeach[i] !== 'off' ||
+                opTav && STATE.monthsTaverna[i] !== 'off';
+    if (any) monthsAnyActive++;
+  }
+  const utilOther = v('util-other') * monthsAnyActive;
+
+  // ---------- TOTALS ----------
+  const totalRevenue = roomsRevenue + aptRevenue + sbRevenue + barRevenue + tavRevenue;
+  const variableCosts = roomsCleaningCost + roomsVarCostTotal + roomsOTACost +
+                        aptCleaningCost + aptVarCostTotal + aptOTACost +
+                        barCogsCost + tavCogsCost + sbConcession;
+  const fixedCosts = rent + insurance + licensing + marketing + maintenance + misc;
+  const utilCosts = utilElecTotal + utilOther;
+  const totalCosts = variableCosts + fixedCosts + utilCosts + staffTotal + ownerCost;
+  const ebitda = totalRevenue - totalCosts;
+  const margin = totalRevenue > 0 ? (ebitda / totalRevenue) * 100 : 0;
+  const capex = v('capex');
+  const paybackYears = ebitda > 0 ? capex / ebitda : Infinity;
+
+  // ---------- RENDER KPIs ----------
+  document.getElementById('kpi-revenue').textContent = fmt(totalRevenue);
+  document.getElementById('kpi-revenue-sub').textContent = `${roomNights.toFixed(0)} room-nights · ${aptNights.toFixed(0)} apt-nights`;
+  document.getElementById('kpi-costs').textContent = fmt(totalCosts);
+  document.getElementById('kpi-costs-sub').textContent = `Var ${fmt(variableCosts)} · Fix ${fmt(fixedCosts + utilCosts)} · Staff ${fmt(staffTotal + ownerCost)}`;
+  document.getElementById('kpi-ebitda').textContent = fmtSigned(ebitda);
+  document.getElementById('kpi-ebitda-sub').textContent = ebitda > 0 ? 'pre-tax operating profit' : 'operating loss';
+  const ebCard = document.getElementById('kpi-ebitda-card');
+  ebCard.classList.remove('good', 'bad', 'warn');
+  if (ebitda > 20000) ebCard.classList.add('good');
+  else if (ebitda < 0) ebCard.classList.add('bad');
+  else ebCard.classList.add('warn');
+  document.getElementById('kpi-margin').textContent = margin.toFixed(1) + '%';
+  document.getElementById('kpi-margin-sub').textContent = margin > 30 ? 'healthy' : margin > 15 ? 'modest' : margin > 0 ? 'thin' : 'negative';
+
+  document.getElementById('kpi-payback').textContent = isFinite(paybackYears) ? paybackYears.toFixed(1) + ' yrs' : '—';
+  document.getElementById('kpi-payback-sub').textContent = `CapEx ${fmt(capex)}`;
+  const totalActiveDays = Math.max(dAccom.total, dBeach.total, dTav.total);
+  document.getElementById('kpi-days').textContent = totalActiveDays + ' d';
+  document.getElementById('kpi-days-sub').textContent = `Accom ${dAccom.total}d · Beach ${dBeach.total}d · Taverna ${dTav.total}d`;
+  document.getElementById('kpi-monthly').textContent = monthsAnyActive > 0 ? fmtSigned(ebitda / monthsAnyActive) : '€0';
+
+  // ---------- REVENUE MIX TABLE + PIE ----------
+  const streams = [
+    { name: 'Rooms', value: roomsRevenue, color: getComputedStyle(document.documentElement).getPropertyValue('--rooms').trim() },
+    { name: 'Apartments', value: aptRevenue, color: getComputedStyle(document.documentElement).getPropertyValue('--apts').trim() },
+    { name: 'Sunbeds', value: sbRevenue, color: getComputedStyle(document.documentElement).getPropertyValue('--sunbeds').trim() },
+    { name: 'Beach Bar', value: barRevenue, color: getComputedStyle(document.documentElement).getPropertyValue('--bar').trim() },
+    { name: 'Taverna', value: tavRevenue, color: getComputedStyle(document.documentElement).getPropertyValue('--taverna').trim() },
+  ];
+  const tbody = document.querySelector('#table-revmix tbody');
+  tbody.innerHTML = '';
+  streams.forEach(s => {
+    const pct = totalRevenue > 0 ? (s.value / totalRevenue * 100).toFixed(1) : '0.0';
+    tbody.innerHTML += `<tr><td><span class="legend-dot" style="background:${s.color}"></span>${s.name}</td><td>${fmt(s.value)}</td><td>${pct}%</td></tr>`;
+  });
+  tbody.innerHTML += `<tr class="total"><td>Total</td><td>${fmt(totalRevenue)}</td><td>100%</td></tr>`;
+
+  renderRevMixChart(streams);
+
+  // ---------- MONTHLY CHART ----------
+  const monthlyRooms = monthlyRevenueSeries(STATE.monthsAccom, roomsPerDayRev);
+  const monthlyApt = monthlyRevenueSeries(STATE.monthsAccom, aptPerDayRev);
+  const monthlySb = monthlyRevenueSeries(STATE.monthsBeach, sbPerDayRev);
+  const monthlyBar = monthlyRevenueSeries(STATE.monthsBeach, barPerDayRev);
+  const monthlyTav = monthlyRevenueSeries(STATE.monthsTaverna, tavPerDayRev);
+
+  // Approximate monthly EBITDA = monthly revenue - (monthly variable + monthly fixed/12 + monthly staff/util)
+  const monthlyEbitda = MONTHS.map((_, i) => {
+    const rev = monthlyRooms[i] + monthlyApt[i] + monthlySb[i] + monthlyBar[i] + monthlyTav[i];
+    if (rev === 0 && (opRooms||opApt||opSb||opBar||opTav) === false) return 0;
+
+    // Variable costs proportional to monthly revenue mix
+    const var_rooms = totalRevenue > 0 && roomsRevenue > 0 ? (monthlyRooms[i] / roomsRevenue) * (roomsCleaningCost + roomsVarCostTotal + roomsOTACost) : 0;
+    const var_apt = aptRevenue > 0 ? (monthlyApt[i] / aptRevenue) * (aptCleaningCost + aptVarCostTotal + aptOTACost) : 0;
+    const var_bar = barRevenue > 0 ? (monthlyBar[i] / barRevenue) * barCogsCost : 0;
+    const var_tav = tavRevenue > 0 ? (monthlyTav[i] / tavRevenue) * tavCogsCost : 0;
+
+    // Concession: spread across beach-active months
+    const beachActiveMonths = STATE.monthsBeach.filter(c => c !== 'off').length;
+    const var_sb = beachActiveMonths > 0 && STATE.monthsBeach[i] !== 'off' ? sbConcession / beachActiveMonths : 0;
+
+    // Staff costs in this month — driven by the payroll window
+    const pr = STATE.payroll[i];
+    let staff_m = 0;
+    if (pr > 0) {
+      if (opBar) staff_m += v('staff-bar') * pr;
+      if (opTav) staff_m += v('staff-taverna') * pr;
+      if (opSb) staff_m += v('staff-sunbed') * pr;
+      if ((opRooms || opApt) && !selfManaged) staff_m += v('staff-reception') * pr;
+      if (!ownerOperated) staff_m += 2000 * pr;
+    }
+    const anyActive = STATE.monthsAccom[i] !== 'off' || STATE.monthsBeach[i] !== 'off' || STATE.monthsTaverna[i] !== 'off';
+
+    // Utilities for this month
+    let elec_m = 0;
+    const classes_m = [];
+    if (opRooms || opApt) classes_m.push(STATE.monthsAccom[i]);
+    if (opSb || opBar) classes_m.push(STATE.monthsBeach[i]);
+    if (opTav) classes_m.push(STATE.monthsTaverna[i]);
+    const active_m = classes_m.filter(c => c !== 'off');
+    if (active_m.length > 0) {
+      elec_m = active_m.includes('peak') ? v('util-elec-peak') : active_m.includes('shoulder') ? v('util-elec-shoulder') : v('util-elec-low');
+    }
+    const other_m = anyActive ? v('util-other') : 0;
+
+    // Allocate fixed costs evenly across 12 months
+    const fixed_m = (rent + insurance + licensing + marketing + maintenance + misc) / 12;
+
+    return rev - (var_rooms + var_apt + var_bar + var_tav + var_sb + staff_m + elec_m + other_m + fixed_m);
+  });
+
+  renderMonthlyChart({ monthlyRooms, monthlyApt, monthlySb, monthlyBar, monthlyTav, monthlyEbitda });
+
+  // ---------- DETAILED P&L ----------
+  const plRows = [
+    ['<strong>REVENUE</strong>', '', 'subtotal'],
+    ['Rooms', roomsRevenue],
+    ['Apartments', aptRevenue],
+    ['Sunbeds', sbRevenue],
+    ['Beach Bar', barRevenue],
+    ['Taverna', tavRevenue],
+    ['<strong>Total revenue</strong>', totalRevenue, 'subtotal'],
+    ['<strong>VARIABLE COSTS</strong>', '', 'subtotal'],
+    ['Rooms cleaning', -roomsCleaningCost],
+    ['Rooms variable (linen/utilities)', -roomsVarCostTotal],
+    ['Rooms OTA commission', -roomsOTACost],
+    ['Apartments cleaning', -aptCleaningCost],
+    ['Apartments variable', -aptVarCostTotal],
+    ['Apartments OTA commission', -aptOTACost],
+    ['Beach Bar COGS', -barCogsCost],
+    ['Taverna food COGS', -tavCogsCost],
+    ['Beach concession fee', -sbConcession],
+    ['<strong>Total variable</strong>', -variableCosts, 'subtotal'],
+    ['<strong>FIXED COSTS</strong>', '', 'subtotal'],
+    ['Rent', -rent],
+    ['Insurance', -insurance],
+    ['Licensing & compliance', -licensing],
+    ['Marketing', -marketing],
+    ['Maintenance', -maintenance],
+    ['Misc / contingency', -misc],
+    ['<strong>STAFF</strong>', '', 'subtotal'],
+    ['Beach bar staff', -staffBar],
+    ['Taverna staff', -staffTav],
+    ['Sunbed attendant', -staffSb],
+    ['Reception', -staffRecept],
+    ['Owner salary', -ownerCost],
+    ['<strong>UTILITIES</strong>', '', 'subtotal'],
+    ['Electric (seasonally varying)', -utilElecTotal],
+    ['Water + gas + waste', -utilOther],
+    ['<strong>Total costs</strong>', -totalCosts, 'subtotal'],
+    ['<strong>EBITDA</strong>', ebitda, 'total'],
+    ['Net margin', margin, 'pct'],
+  ];
+  const plBody = document.querySelector('#table-pl tbody');
+  plBody.innerHTML = plRows.map(([name, val, kind]) => {
+    if (kind === 'subtotal') return `<tr class="subtotal"><td>${name}</td><td>${val === '' ? '' : (typeof val === 'number' ? fmtSigned(val) : val)}</td></tr>`;
+    if (kind === 'total') return `<tr class="total"><td>${name}</td><td class="${val >= 0 ? 'pos' : 'neg'}">${fmtSigned(val)}</td></tr>`;
+    if (kind === 'pct') return `<tr class="total"><td>${name}</td><td>${val.toFixed(1)}%</td></tr>`;
+    return `<tr><td>${name}</td><td class="${val < 0 ? 'neg' : ''}">${fmtSigned(val)}</td></tr>`;
+  }).join('');
+}
+
+// =================== CHARTS ===================
+let chartRevMix = null, chartMonthly = null;
+
+function renderRevMixChart(streams) {
+  const ctx = document.getElementById('chart-revmix').getContext('2d');
+  const filtered = streams.filter(s => s.value > 0);
+  const data = {
+    labels: filtered.map(s => s.name),
+    datasets: [{
+      data: filtered.map(s => s.value),
+      backgroundColor: filtered.map(s => s.color),
+      borderColor: '#1e293b',
+      borderWidth: 2,
+    }],
+  };
+  if (chartRevMix) {
+    chartRevMix.data = data;
+    chartRevMix.update();
+    return;
+  }
+  chartRevMix = new Chart(ctx, {
+    type: 'doughnut',
+    data,
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: true, position: 'bottom', labels: { color: '#94a3b8', font: { size: 11 } } },
+        tooltip: { callbacks: { label: ctx => `${ctx.label}: €${Math.round(ctx.parsed).toLocaleString()}` } },
+      },
+    },
+  });
+}
+
+function renderMonthlyChart(d) {
+  const ctx = document.getElementById('chart-monthly').getContext('2d');
+  const css = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const data = {
+    labels: MONTHS,
+    datasets: [
+      { type: 'bar', label: 'Rooms', data: d.monthlyRooms, backgroundColor: css('--rooms'), stack: 'rev' },
+      { type: 'bar', label: 'Apartments', data: d.monthlyApt, backgroundColor: css('--apts'), stack: 'rev' },
+      { type: 'bar', label: 'Sunbeds', data: d.monthlySb, backgroundColor: css('--sunbeds'), stack: 'rev' },
+      { type: 'bar', label: 'Beach Bar', data: d.monthlyBar, backgroundColor: css('--bar'), stack: 'rev' },
+      { type: 'bar', label: 'Taverna', data: d.monthlyTav, backgroundColor: css('--taverna'), stack: 'rev' },
+      { type: 'line', label: 'EBITDA', data: d.monthlyEbitda, borderColor: '#f87171', backgroundColor: 'rgba(248,113,113,0.1)', borderWidth: 2, tension: 0.3, pointRadius: 3, yAxisID: 'y' },
+    ],
+  };
+  if (chartMonthly) {
+    chartMonthly.data = data;
+    chartMonthly.update();
+    return;
+  }
+  chartMonthly = new Chart(ctx, {
+    data,
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { labels: { color: '#94a3b8', font: { size: 11 } } },
+        tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: €${Math.round(ctx.parsed.y).toLocaleString()}` } },
+      },
+      scales: {
+        x: { stacked: true, ticks: { color: '#94a3b8' }, grid: { color: '#334155' } },
+        y: { stacked: true, ticks: { color: '#94a3b8', callback: v => '€' + (v/1000).toFixed(0) + 'k' }, grid: { color: '#334155' } },
+      },
+    },
+  });
+}
+
+// =================== PRESETS ===================
+const PRESETS = {
+  'full-normal': {
+    op: { rooms: true, apt: true, sb: true, bar: true, tav: true },
+    flags: { selfManaged: false, ownerOperated: true },
+    schedules: { accom: DEFAULT_ACCOM, beach: DEFAULT_BEACH, taverna: DEFAULT_TAVERNA },
+    payroll: [0,0,0,0,0.5,1,1,1,1,0,0,0],
+    values: {
+      'rooms-rate-peak': 60, 'rooms-rate-shoulder': 45, 'rooms-rate-low': 35,
+      'rooms-occ-peak': 65, 'rooms-occ-shoulder': 40, 'rooms-occ-low': 20,
+      'apt-rate-peak': 75, 'apt-rate-shoulder': 55, 'apt-rate-low': 45,
+      'apt-occ-peak': 70, 'apt-occ-shoulder': 45, 'apt-occ-low': 25,
+      'sb-sets': 35, 'sb-price': 10,
+      'sb-util-peak': 55, 'sb-util-shoulder': 30, 'sb-util-low': 15,
+      'bar-covers-peak': 60, 'bar-covers-shoulder': 35, 'bar-covers-low': 15, 'bar-spend': 8,
+      'tav-covers-peak': 50, 'tav-covers-shoulder': 25, 'tav-covers-low': 12, 'tav-spend': 18,
+    },
+  },
+  'full-pessimistic': {
+    op: { rooms: true, apt: true, sb: true, bar: true, tav: true },
+    flags: { selfManaged: false, ownerOperated: true },
+    schedules: { accom: DEFAULT_ACCOM, beach: DEFAULT_BEACH, taverna: DEFAULT_TAVERNA },
+    payroll: [0,0,0,0,0.5,1,1,1,1,0,0,0],
+    values: {
+      'rooms-rate-peak': 50, 'rooms-rate-shoulder': 40, 'rooms-rate-low': 30,
+      'rooms-occ-peak': 45, 'rooms-occ-shoulder': 25, 'rooms-occ-low': 12,
+      'apt-rate-peak': 65, 'apt-rate-shoulder': 50, 'apt-rate-low': 40,
+      'apt-occ-peak': 50, 'apt-occ-shoulder': 30, 'apt-occ-low': 15,
+      'sb-sets': 30, 'sb-price': 8,
+      'sb-util-peak': 35, 'sb-util-shoulder': 20, 'sb-util-low': 10,
+      'bar-covers-peak': 35, 'bar-covers-shoulder': 20, 'bar-covers-low': 8, 'bar-spend': 6,
+      'tav-covers-peak': 30, 'tav-covers-shoulder': 15, 'tav-covers-low': 6, 'tav-spend': 15,
+    },
+  },
+  'full-optimistic': {
+    op: { rooms: true, apt: true, sb: true, bar: true, tav: true },
+    flags: { selfManaged: false, ownerOperated: true },
+    schedules: { accom: DEFAULT_ACCOM, beach: DEFAULT_BEACH, taverna: DEFAULT_TAVERNA },
+    payroll: [0,0,0,0,1,1,1,1,1,0.5,0,0],
+    values: {
+      'rooms-rate-peak': 75, 'rooms-rate-shoulder': 55, 'rooms-rate-low': 40,
+      'rooms-occ-peak': 80, 'rooms-occ-shoulder': 55, 'rooms-occ-low': 30,
+      'apt-rate-peak': 95, 'apt-rate-shoulder': 70, 'apt-rate-low': 50,
+      'apt-occ-peak': 85, 'apt-occ-shoulder': 60, 'apt-occ-low': 35,
+      'sb-sets': 45, 'sb-price': 12,
+      'sb-util-peak': 75, 'sb-util-shoulder': 45, 'sb-util-low': 20,
+      'bar-covers-peak': 90, 'bar-covers-shoulder': 50, 'bar-covers-low': 25, 'bar-spend': 10,
+      'tav-covers-peak': 75, 'tav-covers-shoulder': 40, 'tav-covers-low': 18, 'tav-spend': 22,
+    },
+  },
+  'rooms-only-airbnb': {
+    op: { rooms: true, apt: true, sb: false, bar: false, tav: false },
+    flags: { selfManaged: true, ownerOperated: true },
+    schedules: { accom: DEFAULT_ACCOM, beach: ['off','off','off','off','off','off','off','off','off','off','off','off'], taverna: ['off','off','off','off','off','off','off','off','off','off','off','off'] },
+    payroll: [0,0,0,0,0,0,0,0,0,0,0,0],
+    values: {
+      'rooms-rate-peak': 55, 'rooms-rate-shoulder': 40, 'rooms-rate-low': 30,
+      'rooms-occ-peak': 55, 'rooms-occ-shoulder': 35, 'rooms-occ-low': 18,
+      'apt-rate-peak': 70, 'apt-rate-shoulder': 50, 'apt-rate-low': 40,
+      'apt-occ-peak': 60, 'apt-occ-shoulder': 40, 'apt-occ-low': 22,
+      'rooms-cleaning': 35, 'apt-cleaning': 45,
+    },
+  },
+  'rooms-bar-no-taverna': {
+    op: { rooms: true, apt: true, sb: false, bar: true, tav: false },
+    flags: { selfManaged: false, ownerOperated: true },
+    schedules: { accom: DEFAULT_ACCOM, beach: DEFAULT_BEACH, taverna: ['off','off','off','off','off','off','off','off','off','off','off','off'] },
+    payroll: [0,0,0,0,0.5,1,1,1,1,0,0,0],
+    values: {
+      'rooms-rate-peak': 60, 'rooms-rate-shoulder': 45, 'rooms-rate-low': 35,
+      'rooms-occ-peak': 60, 'rooms-occ-shoulder': 38, 'rooms-occ-low': 20,
+      'bar-covers-peak': 55, 'bar-covers-shoulder': 30, 'bar-covers-low': 12, 'bar-spend': 9,
+    },
+  },
+  'rooms-bar-sunbeds': {
+    op: { rooms: true, apt: true, sb: true, bar: true, tav: false },
+    flags: { selfManaged: false, ownerOperated: true },
+    schedules: { accom: DEFAULT_ACCOM, beach: DEFAULT_BEACH, taverna: ['off','off','off','off','off','off','off','off','off','off','off','off'] },
+    payroll: [0,0,0,0,0.5,1,1,1,1,0,0,0],
+    values: {
+      'rooms-rate-peak': 60, 'rooms-rate-shoulder': 45, 'rooms-rate-low': 35,
+      'rooms-occ-peak': 62, 'rooms-occ-shoulder': 40, 'rooms-occ-low': 22,
+      'sb-util-peak': 55, 'sb-util-shoulder': 30, 'sb-util-low': 15,
+      'bar-covers-peak': 70, 'bar-covers-shoulder': 40, 'bar-covers-low': 15, 'bar-spend': 9,
+    },
+  },
+  'taverna-winter': {
+    op: { rooms: false, apt: false, sb: false, bar: false, tav: true },
+    flags: { selfManaged: false, ownerOperated: true },
+    schedules: {
+      accom: ['off','off','off','off','off','off','off','off','off','off','off','off'],
+      beach: ['off','off','off','off','off','off','off','off','off','off','off','off'],
+      taverna: ['low','low','low','low','off','off','off','off','off','off','low','low'], // Winter weekends only — modelled as low traffic
+    },
+    payroll: [0.5,0.5,0.5,0.5,0,0,0,0,0,0,0.5,0.5], // weekend-only kitchen help
+    values: {
+      'tav-covers-peak': 0, 'tav-covers-shoulder': 0, 'tav-covers-low': 22, 'tav-spend': 17,
+      'staff-taverna': 2200,
+    },
+  },
+  'full-year-taverna': {
+    op: { rooms: true, apt: true, sb: true, bar: true, tav: true },
+    flags: { selfManaged: false, ownerOperated: true },
+    schedules: {
+      accom: DEFAULT_ACCOM,
+      beach: DEFAULT_BEACH,
+      taverna: ['low','low','low','low','low','shoulder','peak','peak','shoulder','low','low','low'],
+    },
+    payroll: [0.5,0.5,0.5,0.5,1,1,1,1,1,0.5,0.5,0.5], // year-round taverna staff at reduced winter level
+    values: {
+      'tav-covers-peak': 50, 'tav-covers-shoulder': 25, 'tav-covers-low': 14, 'tav-spend': 18,
+    },
+  },
+};
+
+function applyPreset(name) {
+  const p = PRESETS[name];
+  if (!p) return;
+
+  // Operations toggles
+  document.getElementById('op-rooms').checked = p.op.rooms;
+  document.getElementById('op-apartments').checked = p.op.apt;
+  document.getElementById('op-sunbeds').checked = p.op.sb;
+  document.getElementById('op-bar').checked = p.op.bar;
+  document.getElementById('op-taverna').checked = p.op.tav;
+  document.getElementById('self-managed').checked = p.flags.selfManaged;
+  document.getElementById('owner-operated').checked = p.flags.ownerOperated;
+
+  // Schedules
+  if (p.schedules.accom) STATE.monthsAccom = [...p.schedules.accom];
+  if (p.schedules.beach) STATE.monthsBeach = [...p.schedules.beach];
+  if (p.schedules.taverna) STATE.monthsTaverna = [...p.schedules.taverna];
+  if (p.payroll) STATE.payroll = [...p.payroll];
+  buildMonthGrid('months-accom', 'monthsAccom');
+  buildMonthGrid('months-beach', 'monthsBeach');
+  buildMonthGrid('months-taverna', 'monthsTaverna');
+  buildPayrollGrid();
+
+  // Values
+  if (p.values) {
+    Object.entries(p.values).forEach(([key, val]) => {
+      const slider = document.getElementById(key);
+      const num = document.getElementById(key + '-n');
+      if (slider) slider.value = val;
+      if (num) num.value = val;
+    });
+  }
+  compute();
+}
+
+document.querySelectorAll('.preset-btn').forEach(btn => {
+  btn.addEventListener('click', () => applyPreset(btn.dataset.preset));
+});
+
+// Initial compute
+compute();
+</script>
+</body>
+</html>
